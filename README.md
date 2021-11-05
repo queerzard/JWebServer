@@ -12,11 +12,15 @@ It simplifies the usage of the provided HttpServer.
 - [x] Cookies!
 - [x] Attach files to a response
 - [x] Get a HashMap that contains the given query instead of the plain string, that hasn't been split
-- [ ] Automatic AccessHandler indentification.
+- [ ] Automatic AccessHandler identification.
 - [ ] AccessHandler/Contoller Annotation example: ( @AccessContoller("/the/desired/index") )
 - [ ] .html support
 - [ ] CSS support
 - [ ] Resource support in general. example: ( Dragging images or other types of data into a folder. Automatically index resource )
+- [ ] Set 404 Page
+- [ ] Dynamic resources
+- [ ] Improve Cookie-support
+
 ## Used APIs
 
 The JWebServer API is also using a number of apis to function properly:
