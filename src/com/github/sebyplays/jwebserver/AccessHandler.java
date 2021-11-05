@@ -44,14 +44,14 @@ public abstract class AccessHandler implements HttpHandler {
 
     @SneakyThrows
     public void setCookie(Cookie cookie){
-        httpExchange.getResponseHeaders().add("Set-Cookie", cookie.getKey() + "=" + cookie.getValue());
+        httpExchange.getResponseHeaders().add("Set-Cookie", cookie.toString());
     }
 
     @SneakyThrows
     public void removeCookie(String key){
         setCookie(key, null);
     }
-
+    //TODO The problem is occurring in this piece of code whilst trying to parse the cookies.
     public List<Cookie> getCookies(){
         List<String> cook = null;
         if((cook = httpExchange.getRequestHeaders().get("Cookie")) != null){

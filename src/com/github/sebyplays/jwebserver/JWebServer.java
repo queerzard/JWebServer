@@ -1,15 +1,18 @@
 package com.github.sebyplays.jwebserver;
 
+import com.github.sebyplays.jwebserver.utils.Utilities;
+import com.github.sebyplays.jwebserver.utils.annotations.AccessController;
 import com.github.sebyplays.jwebserver.api.Extension;
+import com.github.sebyplays.jwebserver.utils.annotations.Register;
+import com.github.sebyplays.jwebserver.utils.exceptions.ContextAlreadyAssignedException;
 import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class JWebServer {
@@ -79,8 +82,31 @@ public class JWebServer {
 
     public static void main(String[] args) {
         JWebServer jWebServer = new JWebServer(13141);
-        jWebServer.loadExtensions();
+        jWebServer.registerControllers("com.github.sebyplays.jwebserver.handler");
         jWebServer.start();
+    }
+
+    public Annotation getAnnotation(Class clazz, Class annotation){
+        if(clazz.isAnnotationPresent(annotation))
+            return clazz.getAnnotation(annotation);
+        return null;
+    }
+
+    @SneakyThrows
+    public void registerControllers(String packageName){
+        Class[] classes = Utilities.getClasses(packageName);
+        for (Class clazz : classes){
+            if(clazz.getSuperclass() == (AccessHandler.class) &&
+                    clazz.isAnnotationPresent(Register.class) &&
+                    clazz.isAnnotationPresent(AccessController.class)){
+                AccessController accessController = (AccessController) getAnnotation(clazz, AccessController.class);
+                if(!httpContexts.containsKey(accessController.index())){
+                    registerContext(accessController.index(), (AccessHandler) clazz.newInstance());
+                    return;
+                }
+                throw new ContextAlreadyAssignedException("We've encountered an error! Key already assigned " + accessController.index());
+            }
+        }
     }
 
 }

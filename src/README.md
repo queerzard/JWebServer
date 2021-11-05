@@ -7,12 +7,20 @@ It simplifies the usage of the provided HttpServer.
 
 ## Features
 
-- Load extensions in form of .class files instead of .html
-- (.html support will be added in future)
-- An event is being triggered, when accessing contexts.
-- Cookies!
-- Attach files to a response
-- Get a HashMap that contains the given query instead of the plain string, that hasn't been split
+- [x] Load extensions in form of .class files instead of .html
+- [x] An event is being triggered, when accessing contexts.
+- [x] Cookies!
+- [x] Attach files to a response
+- [x] Get a HashMap that contains the given query instead of the plain string, that hasn't been split
+- [x] Automatic AccessHandler identification.
+- [x] AccessHandler/Contoller Annotation example: ( @AccessContoller("/the/desired/index") )
+- [ ] .html support
+- [ ] CSS support
+- [ ] Resource support in general. example: ( Dragging images or other types of data into a folder. Automatically index resource )
+- [ ] Set 404 Page
+- [ ] Dynamic resources
+- [ ] Improve Cookie-support
+- [ ] Add SSL encryption support
 
 ## Used APIs
 
@@ -92,23 +100,23 @@ It includes the code, that is being executed, when calling the website.
 // "setHttpExchange" of the super-class, with the parameter shown in the example. otherwhise it won't work, because
 // the code that is following up internally, uses the object.
 
-public class YourCustomHandler extends AccessHandler {
-    public void handle(HttpExchange httpExchange) throws IOException {
-        setHttpExchange(httpExchange);
-        respond(200, "IT WORKED!" + this.getQuery());
+    public class YourCustomHandler extends AccessHandler {
+        public void handle(HttpExchange httpExchange) throws IOException {
+            setHttpExchange(httpExchange);
+            respond(200, "IT WORKED!" + this.getQuery());
+        }
     }
-}
 
 //Get the queryMap from the accessed site:
-getQueryMap();
+    getQueryMap();
 
 //Example usecase:
-if(getQueryMap().containsKey("token") && getQueryMap().get("token").equals("someAccessToken")){
-    respond(200, "Your token is valid. yay. ok. now go on.");
-    return;
-} else {
-    respond(200, "Your key is invalid..")
-}
+    if(getQueryMap().containsKey("token") && getQueryMap().get("token").equals("someAccessToken")){
+        respond(200, "Your token is valid. yay. ok. now go on.");
+        return;
+    } else {
+        respond(200, "Your key is invalid..")
+    }
 
 //Send a response:
 // To send a response, you have to either call the normal respond() method 
@@ -119,37 +127,85 @@ if(getQueryMap().containsKey("token") && getQueryMap().get("token").equals("some
 // You can also send html source code through the string and it will be displayed as  
 // it's supposed to be.
 
-respond(200, "<html><h1>This is a header</h1></html>");
+    respond(200, "<html><h1>This is a header</h1></html>");
 
-fileResponse(200, new File(System.getProperty("user.dir") + "/some/file.txt"));
+    fileResponse(200, new File(System.getProperty("user.dir") + "/some/file.txt"));
 
 // You can also get and set cookies to the response headers
 
 // get cookies by key:
-getCookie("KeyOfCookie");
+    getCookie("KeyOfCookie");
 
 // set cookie:
-setCookie("KeyOfCookie", "ValueOfCookie");
+    setCookie("KeyOfCookie", "ValueOfCookie");
 
 // remove cookie:
-removeCookie("KeyOfCookie");
+    removeCookie("KeyOfCookie");
 
 // get a list of cookies:
-getCookies();
+    getCookies();
 
 
 ```
 
+
 #### ContextAccessedEvent
-Listeners of this event are being triggered, 
+Listeners of this event are being triggered,
 whenever the setHttpHandler method is called.
 
 Look up my project page of the [JEvent] on GitHub to see how to work with it.
 
 
+
+### Annotations
+
+#### @Register
+```
+//The @Register class annotation is used to identify classes, that shall be automatically registered,
+//when the "registerControllers(String packageNameOfClasses)" has been invoked
+//so it's not neccessary anymore to execute the "registerContext(String s, AccessHandler a)" 
+//method in the JWebServer class for each class you want to register.
+
+This annotation must always come along with the following annotation.
+
+```
+
+#### @AccessController
+
+```
+//The @AccessContoller class annotation defines the path 
+//under which the registered handler can be accessed.
+
+```
+
+##### Annotated Example
+
+```java
+package some.project.pkg;
+
+import com.github.sebyplays.jwebserver.utils.annotations.AccessController;
+import com.github.sebyplays.jwebserver.utils.annotations.Register;
+
+//Define the controllers link
+@AccessController(index = "link/of/controller")
+//Tell the method to register this class
+@Register
+public class YourCustomHandler extends AccessHandler {
+    public void handle(HttpExchange httpExchange) throws IOException {
+        setHttpExchange(httpExchange);
+        respond(200, "IT WORKED!" + this.getQuery());
+    }
+}
+
+//So in this example, the webpage can be opened by the browser of your choice with the link 
+// http://localhost:8096/link/of/controller
+```
+
 ## License
 
 MIT
+
+**Free Software, Hell Yeah!**
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
