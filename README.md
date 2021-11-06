@@ -170,6 +170,10 @@ Look up my project page of the [JEvent] on GitHub to see how to work with it.
 //so it's not neccessary anymore to execute the "registerContext(String s, AccessHandler a)" 
 //method in the JWebServer class for each class you want to register.
 
+//You must always define the priority of the handler. If the priority is set to high, 
+//the already registered module is overwritten and executed instead. 
+//If the priority is set to "NORMAL" or "LOW", the defined classes can be overwritten.
+
 This annotation must always come along with the following annotation.
 
 ```
@@ -187,13 +191,14 @@ This annotation must always come along with the following annotation.
 ```java
 package some.project.pkg;
 
+import com.github.sebyplays.jwebserver.utils.Priority;
 import com.github.sebyplays.jwebserver.utils.annotations.AccessController;
 import com.github.sebyplays.jwebserver.utils.annotations.Register;
 
 //Define the controllers link
 @AccessController(index = "link/of/controller")
 //Tell the method to register this class
-@Register
+@Register(priority = Priority.NORMAL)
 public class YourCustomHandler extends AccessHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         setHttpExchange(httpExchange);
@@ -204,6 +209,7 @@ public class YourCustomHandler extends AccessHandler {
 //So in this example, the webpage can be opened by the browser of your choice with the link 
 // http://localhost:8096/link/of/controller
 ```
+
 
 ## License
 

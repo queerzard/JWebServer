@@ -22,9 +22,13 @@ public class Cookie {
     @Getter @Setter private boolean secure;
     @Getter @Setter private boolean httpOnly;
 
-    public Cookie(String keyValueSet){
-        this.key = keyValueSet.split("=")[0];
-        this.value = keyValueSet.split("=")[1];
+    public Cookie(String key, String value){
+        this.key = key;
+        this.value = value;
+    }
+
+    public Cookie(String cookieSet){
+
     }
 
     public Cookie(String key, String value, Date expires, int maxAge, String domain, String path, SameSite sameSite, boolean secure, boolean httpOnly){

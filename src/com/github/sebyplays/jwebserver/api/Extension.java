@@ -2,6 +2,8 @@ package com.github.sebyplays.jwebserver.api;
 
 import com.github.sebyplays.jwebserver.AccessHandler;
 import com.github.sebyplays.jwebserver.JWebServer;
+import com.github.sebyplays.jwebserver.utils.Utilities;
+import com.github.sebyplays.jwebserver.utils.annotations.AccessController;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.ClassWriter;
 import jdk.internal.org.objectweb.asm.commons.Remapper;
@@ -33,7 +35,6 @@ public class Extension extends ClassLoader{
             return;
         if(!file.getName().endsWith(".class"))
             return;
-
         context = path.replaceAll("\\.class", "");
         className = file.getName().replaceAll("\\.class", "");
         classPath = file.getParentFile().getAbsolutePath();
@@ -68,7 +69,10 @@ public class Extension extends ClassLoader{
         //classFile = Class.forName(context.replaceAll("/", "."), true, new URLClassLoader(new URL[]{rootDirectory.toURI().toURL()}, this.getClass().getClassLoader()));
         classFile = Class.forName(className, true, new URLClassLoader(new URL[]{new File(classPath).toURI().toURL()}, this.getClass().getClassLoader()));
         accessHandler = (AccessHandler) classFile.newInstance();
-
+        if(!classFile.isAnnotationPresent(AccessController.class))
+            return;
+        AccessController accessController = (AccessController) Utilities.getAnnotation(classFile, AccessController.class);
+        context = accessController.index();
     }
 
 }

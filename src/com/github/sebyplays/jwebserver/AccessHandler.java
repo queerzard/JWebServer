@@ -51,6 +51,7 @@ public abstract class AccessHandler implements HttpHandler {
     public void removeCookie(String key){
         setCookie(key, null);
     }
+
     //TODO The problem is occurring in this piece of code whilst trying to parse the cookies.
     public List<Cookie> getCookies(){
         List<String> cook = null;
@@ -58,7 +59,7 @@ public abstract class AccessHandler implements HttpHandler {
             String[] cooks = cook.toString().replaceAll("\\[", "").replaceAll("]", "").split("; ");
             List<Cookie> cookies = new ArrayList();
             for(String cooki : cooks){
-                cookies.add(new Cookie(cooki));
+                cookies.add(new Cookie(cooki.split("=")[0], cooki.split("=")[1]));
             }
             return cookies;
         }

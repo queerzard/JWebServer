@@ -2,6 +2,7 @@ package com.github.sebyplays.jwebserver.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -41,6 +42,12 @@ public class Utilities {
             }
         }
         return classes;
+    }
+
+    public static Annotation getAnnotation(Class clazz, Class annotation){
+        if(clazz.isAnnotationPresent(annotation))
+            return clazz.getAnnotation(annotation);
+        return null;
     }
 
 }
