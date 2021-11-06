@@ -1,10 +1,11 @@
 # JWebServer
+***
 ## A Java WebServer API
 
 The JWebServer is a Java API that utilizes the integrated sun.httpserver package.
 It simplifies the usage of the provided HttpServer.
 
-
+***
 ## Features
 
 - [x] Load extensions in form of .class files instead of .html
@@ -32,7 +33,7 @@ The JWebServer API is also using a number of apis to function properly:
 - [HttpServer] - The sun.httpserver provided by default.
 
 ## Usage
-
+***
 Classify a variable by the type of the "JWebServer" Object
 and initialize it with an instanciated object of the class,
 with the desired port inbetween the parentheses of the constructor parameters.
@@ -46,23 +47,26 @@ JWebServer jWebServer = new JWebServer(9086);
 // Register a context:
 // the first parameter is a string, which will define the link under which the context is accessible.
 // so to access this context, you'd have to open your brower on "http://localhost:9086/this/is/a"
-// Once the link is being opened, the handle() method of the AccessHandler defined in the second parameter is triggered.
-jWebServer.registerContext("this/is/a", new TestContext());
+// Once the link is being opened, the handle() method of the AccessHandler defined in the second parameter is triggered:
+        jWebServer.registerContext("this/is/a", new TestContext());
+
+// register annotated controllers:
+        jWebServer.registerControllers("some.project.pkg");
 
 // Unregister a context:
-jWebServer.unregisterContext("link/to/context");
+        jWebServer.unregisterContext("link/to/context");
 
 // start the server:
-jWebServer.start();
+        jWebServer.start();
 
 // stop the server:
-jWebServer.stop();
+        jWebServer.stop();
 
 // Get the hashmap containinh the registered contexts:
-jWebServer.getHttpContexts();
+        jWebServer.getHttpContexts();
 
 // Get the hasmap containing the loaded extensions:
-jWebServer.getExtensions();
+        jWebServer.getExtensions();
 
 // The key to the value of both of the HashMaps mentioned 
 // above is same the path for the browser to access the contexts
@@ -78,7 +82,7 @@ Path:
 
 ```java
 // load all extensions located in the path:
-jWebServer.loadExtensions()
+        jWebServer.loadExtensions();
 
 // the extension class contains methods for registering the extension, 
 // removing and reloading the extension.
@@ -115,7 +119,7 @@ It includes the code, that is being executed, when calling the website.
         respond(200, "Your token is valid. yay. ok. now go on.");
         return;
     } else {
-        respond(200, "Your key is invalid..")
+        respond(200, "Your key is invalid..");
     }
 
 //Send a response:
@@ -156,7 +160,7 @@ whenever the setHttpHandler method is called.
 Look up my project page of the [JEvent] on GitHub to see how to work with it.
 
 
-
+***
 ### Annotations
 
 #### @Register
@@ -205,9 +209,8 @@ public class YourCustomHandler extends AccessHandler {
 
 MIT
 
-**Free Software, Hell Yeah!**
+****
 
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
 [JEvent]: <https://github.com/SebyPlays/JEvent>
 [lombok]: <https://projectlombok.org/>
