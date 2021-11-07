@@ -12,8 +12,9 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
-
+import  com.sun.net.httpserver.HttpExchange;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class JWebServer {
 
@@ -31,17 +33,23 @@ public class JWebServer {
 
     @Getter private HashMap<String, HttpContext> httpContexts = new HashMap<>();
     @Getter private HashMap<String, Extension> extensions = new HashMap<>();
-    private File rootClassDir = new File(System.getProperty("user.dir") + "/data/www/class/");
-    private File rootHtmlDir = new File(System.getProperty("user.dir") + "/data/www/html/");
+
+    @Getter @Setter private static File notFoundPage = new File(JWebServer.class.getResource("/com/github/sebyplays/jwebserver/utils/html/404.html").getFile());
+
+    public static final File rootClassDir = new File(System.getProperty("user.dir") + "/data/www/class/");
+    public static final File rootHtmlDir = new File(System.getProperty("user.dir") + "/data/www/html/");
 
     //TODO Find the part of the native java code, where context access attempts are processed,
     // inherit from these classes and override the method with their basic functionality
     // and your specific improvements in addition.
 
-    //TODO Inform yourself about the com.sun.net.httpserver.HTTPExchange and the javax.xml.ws.Endpoint Object. B
+    //TODO Inform yourself about the com.sun.net.httpserver.HTTPExchange and the javax.xml.ws.Endpoint Object.
     // Both classes contain the information of how the context processing works.
-    // Prepare yourself for Mindfuck once you returned!
+    // Prepare yourself for Mindf*ck once you returned!
+    // Greets, You.
 
+    //TODO Never mind, the step mentioned above wasn't necessary, we solved it in the example handler named "Index"
+    // adding those features was easier than expected.
     @SneakyThrows
     public JWebServer(Type httpsOrHttp, int port) throws NoSuchAlgorithmException {
         this.port = port;
@@ -61,6 +69,15 @@ public class JWebServer {
 
         if(!rootHtmlDir.exists())
             rootHtmlDir.mkdirs();
+    }
+
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        JWebServer jWebServer = new JWebServer(Type.HTTP, 13141);
+        jWebServer.loadExtensions();
+        jWebServer.registerControllers("com.github.sebyplays.jwebserver.testHandler");
+        jWebServer.start();
     }
 
     public void start(){
@@ -111,13 +128,6 @@ public class JWebServer {
     }
 
     @SneakyThrows
-    public static void main(String[] args) {
-        JWebServer jWebServer = new JWebServer(Type.HTTP, 13141);
-        jWebServer.registerControllers("com.github.sebyplays.jwebserver.testHandler");
-        jWebServer.start();
-    }
-
-    @SneakyThrows
     public void registerControllers(String packageName){
         Class[] classes = Utilities.getClasses(packageName);
         for (Class clazz : classes){
@@ -126,7 +136,7 @@ public class JWebServer {
                     clazz.isAnnotationPresent(AccessController.class)){
                 AccessController accessController = (AccessController) Utilities.getAnnotation(clazz, AccessController.class);
                 Register register = (Register) Utilities.getAnnotation(clazz, Register.class);
-                if(!httpContexts.containsKey(accessController.index()) || register.priority() == Priority.HIGH){
+                if(!httpContexts.containsKey(accessController.index()) || register.priority() == Priority.PRIORITIZED){
                     unregisterContext(accessController.index());
                     registerContext(accessController.index(), (AccessHandler) clazz.newInstance());
                     continue;
@@ -135,5 +145,7 @@ public class JWebServer {
             }
         }
     }
+
+
 
 }

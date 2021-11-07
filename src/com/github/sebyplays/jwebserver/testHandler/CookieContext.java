@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 @AccessController(index = "cookieTest")
-@Register(priority = Priority.NORMAL)
+@Register(priority = Priority.DEFAULT)
 public class CookieContext extends AccessHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -25,7 +25,7 @@ public class CookieContext extends AccessHandler {
         //  To be more specific on why it's exactly not working: The getCookies() Method is buggy if the cookies are empty on the users side.
         //  The Code is trying to access values that do not exist, making the code dysfunctional.
 
-        setHttpExchange(httpExchange);
+        if(setHttpExchange(httpExchange)) return;
         HashMap<String, String> props = getQueryMap();
         if(Boolean.parseBoolean(props.get("mode"))){
             setCookie(new Cookie("testCookie", "thicc", new Date(System.currentTimeMillis() + 100000), 10, null, null, SameSite.LAX, true, false));

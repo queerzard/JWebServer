@@ -2,6 +2,7 @@ package com.github.sebyplays.jwebserver;
 
 import com.github.sebyplays.jevent.api.JEvent;
 import com.github.sebyplays.jwebserver.events.ContextAccessedEvent;
+import com.github.sebyplays.jwebserver.utils.ContentType;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.Getter;
@@ -68,15 +69,34 @@ public abstract class AccessHandler implements HttpHandler {
 
     @SneakyThrows
     public void respond(int responseCode, String response){
-        httpExchange.sendResponseHeaders(responseCode, response.getBytes().length);
-        httpExchange.getResponseBody().write(response.getBytes());
+        respond(responseCode, ContentType.TEXT_HTML, response.getBytes());
+    }
+
+    public void respond(int responseCode, ContentType contentType, byte[] response){
+        setContentType(contentType);
+        respond(responseCode, response);
+    }
+
+    @SneakyThrows
+    public void fileDownloadResponse(File file){
+        httpExchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=" + file.getName());
+        fileResponse(file);
+    }
+
+    public void setContentType(ContentType contentType){
+        httpExchange.getResponseHeaders().add("Content-Type", contentType.getContentType());
+    }
+
+    @SneakyThrows
+    public void respond(int responseCode, byte[] responseBytes){
+        httpExchange.sendResponseHeaders(responseCode, responseBytes.length);
+        httpExchange.getResponseBody().write(responseBytes);
         httpExchange.getResponseBody().flush();
         httpExchange.close();
     }
 
     @SneakyThrows
     public void fileResponse(File file){
-        httpExchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=" + file.getName());
         httpExchange.sendResponseHeaders(200, file.length());
         Files.copy(file.toPath(), httpExchange.getResponseBody());
         httpExchange.getResponseBody().flush();

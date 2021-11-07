@@ -15,12 +15,9 @@ It simplifies the usage of the provided HttpServer.
 - [x] Get a HashMap that contains the given query instead of the plain string, that hasn't been split
 - [x] Automatic AccessHandler identification.
 - [x] AccessHandler/Contoller Annotation example: ( @AccessContoller("/the/desired/index") )
-- [ ] .html support
-- [ ] CSS support
-- [ ] Resource support in general. example: ( Dragging images or other types of data into a folder. Automatically index resource )
-- [ ] Set 404 Page
-- [ ] Dynamic resources
-- [ ] Improve Cookie-support
+- [x] Dynamic resource support
+- [x] Custom 404 Page
+- [x] Improve Cookie-support
 - [ ] Add SSL encryption support
 
 ## Used APIs
@@ -67,6 +64,9 @@ JWebServer jWebServer = new JWebServer(9086);
 
 // Get the hasmap containing the loaded extensions:
         jWebServer.getExtensions();
+        
+//Set custom 404 page:
+        jWebServer.setNotFoundPage(new File("/path/to/404.html"));
 
 // The key to the value of both of the HashMaps mentioned 
 // above is same the path for the browser to access the contexts
@@ -132,8 +132,12 @@ It includes the code, that is being executed, when calling the website.
 // it's supposed to be.
 
     respond(200, "<html><h1>This is a header</h1></html>");
-
-    fileResponse(200, new File(System.getProperty("user.dir") + "/some/file.txt"));
+    
+// Prompts the user to download the file specified.
+    fileDownloadResponse(new File(System.getProperty("user.dir") + "/some/file.txt"));
+    
+// can display the file specified in combination of the setContentType() method.  
+    fileResponse(new File(System.getProperty("user.dir") + "/some/image.png"));
 
 // You can also get and set cookies to the response headers
 
@@ -148,6 +152,11 @@ It includes the code, that is being executed, when calling the website.
 
 // get a list of cookies:
     getCookies();
+    
+// set content-type of response:
+    setContentType(ContentType contentType);
+    
+    
 
 
 ```
@@ -172,7 +181,7 @@ Look up my project page of the [JEvent] on GitHub to see how to work with it.
 
 //You must always define the priority of the handler. If the priority is set to high, 
 //the already registered module is overwritten and executed instead. 
-//If the priority is set to "NORMAL" or "LOW", the defined classes can be overwritten.
+//If the priority is set to "DEFAULT" or "PRIORITIZED", the defined classes can be overwritten.
 
 This annotation must always come along with the following annotation.
 
@@ -198,7 +207,7 @@ import com.github.sebyplays.jwebserver.utils.annotations.Register;
 //Define the controllers link
 @AccessController(index = "link/of/controller")
 //Tell the method to register this class
-@Register(priority = Priority.NORMAL)
+@Register(priority = Priority.DEFAULT)
 public class YourCustomHandler extends AccessHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         setHttpExchange(httpExchange);

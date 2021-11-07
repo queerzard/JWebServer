@@ -9,11 +9,11 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 
 @AccessController(index = "test")
-@Register(priority = Priority.NORMAL)
+@Register(priority = Priority.DEFAULT)
 public class BasicFunctionalityTest extends AccessHandler {
     @Override
     public void handle(HttpExchange httpExchange){
-        setHttpExchange(httpExchange);
+        if(setHttpExchange(httpExchange)) return;
         respond(200, "It's working so far!");
     }
 }
