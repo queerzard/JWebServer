@@ -1,22 +1,22 @@
 package com.github.sebyplays.jwebserver;
 
 import com.github.sebyplays.jevent.api.JEvent;
+import com.github.sebyplays.jwebserver.api.Response;
+import com.github.sebyplays.jwebserver.api.ResponseHandler;
 import com.github.sebyplays.jwebserver.events.ContextAccessedEvent;
 import com.github.sebyplays.jwebserver.utils.ContentType;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
-public abstract class AccessHandler implements HttpHandler {
+public abstract class AccessHandler implements HttpHandler, ResponseHandler {
 
     @Getter private HttpExchange httpExchange;
     @Getter private HashMap<String, String> queryMap;
@@ -67,6 +67,38 @@ public abstract class AccessHandler implements HttpHandler {
         return null;
     }
 
+    public void respond(Response response){
+        if(response == null){
+            respond(500, "Internal Server Error");
+            return;
+        }
+
+        switch (response.getResponseType()){
+            case FILE:
+                fileResponse(response.getFile());
+                return;
+
+            case TEXT:
+                respond(response.getStatusCode(), new String(response.getResponse()));
+                return;
+
+            case BYTES:
+                if(response.getContentType() != null){
+                    respond(response.getStatusCode(), response.getContentType(), response.getResponse());
+                    return;
+                }
+                respond(response.getStatusCode(), response.getResponse());
+                return;
+
+            case REDIRECT:
+                redirect(response.getRedirect().getUrl());
+                return;
+
+            case DOWNLOAD:
+                fileDownloadResponse(response.getFile());
+        }
+    }
+
     @SneakyThrows
     public void respond(int responseCode, String response){
         respond(responseCode, ContentType.TEXT_HTML, response.getBytes());
@@ -75,6 +107,10 @@ public abstract class AccessHandler implements HttpHandler {
     public void respond(int responseCode, ContentType contentType, byte[] response){
         setContentType(contentType);
         respond(responseCode, response);
+    }
+
+    public void redirect(String url) {
+        respond(200, "<meta http-equiv=\"Refresh\" content=\"3; url=" + url + "\">");
     }
 
     @SneakyThrows
@@ -120,6 +156,12 @@ public abstract class AccessHandler implements HttpHandler {
             return hashMap;
         }
         return null;
+    }
+
+    @Override
+    public void handle(HttpExchange httpExchange) {
+        if(setHttpExchange(httpExchange)) return;
+        respond(handle(httpExchange, this));
     }
 
 }

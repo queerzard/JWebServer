@@ -3,8 +3,10 @@ package com.github.sebyplays.jwebserver.events;
 import com.github.sebyplays.jevent.Event;
 import com.github.sebyplays.jwebserver.AccessHandler;
 import com.github.sebyplays.jwebserver.Cookie;
+import com.github.sebyplays.jwebserver.api.Response;
 import com.sun.net.httpserver.HttpExchange;
 import lombok.Getter;
+import org.jsoup.Jsoup;
 
 import java.util.List;
 
@@ -23,7 +25,10 @@ public class ContextAccessedEvent extends Event {
         if(cookies2 != null)
             this.cookies = cookies2.toArray(new Cookie[cookies2.size()]);
         this.httpExchange = accessHandler.getHttpExchange();
+    }
 
+    public void respond(Response response){
+        accessHandler.respond(response);
     }
 
 }

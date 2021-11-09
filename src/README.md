@@ -18,6 +18,7 @@ It simplifies the usage of the provided HttpServer.
 - [x] Dynamic resource support
 - [x] Custom 404 Page
 - [x] Improve Cookie-support
+- [x] Improve performance
 - [ ] Add SSL encryption support
 
 ## Used APIs
@@ -28,6 +29,7 @@ The JWebServer API is also using a number of apis to function properly:
 - [lombok] - Automate your logging variables, and much more.
 - [org.json] - A reference implementation of a JSON package in Java.
 - [HttpServer] - The sun.httpserver provided by default.
+- [JSoup] - A Java HTML parser.
 
 ## Usage
 ***
@@ -100,63 +102,59 @@ It includes the code, that is being executed, when calling the website.
 // you simply have to create a class, that is inheriting from the mentioned class with the "extend" inheritance-keyword.
 // Your IDE will prompt you to implement the "handle()" method. Do that.
 // Once you have implemented the method, your class should look like in the example.
-// The very first line in the handle method must call the method named
-// "setHttpExchange" of the super-class, with the parameter shown in the example. otherwhise it won't work, because
-// the code that is following up internally, uses the object.
+// Return a response object to send it.
+import com.github.sebyplays.jwebserver.AccessHandler;
+import com.github.sebyplays.jwebserver.api.Status;
 
-    public class YourCustomHandler extends AccessHandler {
-        public void handle(HttpExchange httpExchange) throws IOException {
-            setHttpExchange(httpExchange);
-            respond(200, "IT WORKED!" + this.getQuery());
-        }
+public class YourCustomHandler extends AccessHandler {
+    public Response handle(HttpExchange httpExchange, AccessHandler accessHandler){
+        return new Response(Status.OK, "IT WORKED!" + this.getQuery());
     }
+}
 
-//Get the queryMap from the accessed site:
+    //Get the queryMap from the accessed site:
     getQueryMap();
 
 //Example usecase:
-    if(getQueryMap().containsKey("token") && getQueryMap().get("token").equals("someAccessToken")){
-        respond(200, "Your token is valid. yay. ok. now go on.");
-        return;
-    } else {
-        respond(200, "Your key is invalid..");
-    }
+    if(getQueryMap().containsKey("token")&&getQueryMap().get("token").equals("someAccessToken"))
+            return new Response(Status.OK,"Your token is valid. yay. ok. now go on.");
+            return new Response(Status.OK,"Your key is invalid..");
 
 //Send a response:
-// To send a response, you have to either call the normal respond() method 
-// or the fileResponse() method depending on what you want to send.
-// The normal respond() method has two parameters, 
-// the first is for the http response codes 
-// and the second is for the string you want to deliver.
-// You can also send html source code through the string and it will be displayed as  
-// it's supposed to be.
+// You basically start off with returning a newly created instance of the Response class.
+// This class contains multiple constructors for different usecases, 
+// choose the one that suits your needs.
 
-    respond(200, "<html><h1>This is a header</h1></html>");
-    
+            return new Response(Status.OK,"This is a Text-response");
+
 // Prompts the user to download the file specified.
-    fileDownloadResponse(new File(System.getProperty("user.dir") + "/some/file.txt"));
-    
+// The first parameter is defining the status of the response.
+// The second parameter is deciding whether the file should be downloaded or not.
+// The third parameter is the file to be downloaded.
+
+            return new Response(Status.OK,true,new File("/path/to/file.txt"));
+
 // can display the file specified in combination of the setContentType() method.  
-    fileResponse(new File(System.getProperty("user.dir") + "/some/image.png"));
+            return new Response(Status.OK,false,new File(System.getProperty("user.dir")+"/some/image.png"));
 
 // You can also get and set cookies to the response headers
 
 // get cookies by key:
-    getCookie("KeyOfCookie");
+            getCookie("KeyOfCookie");
 
 // set cookie:
-    setCookie("KeyOfCookie", "ValueOfCookie");
+            setCookie("KeyOfCookie","ValueOfCookie");
 
 // remove cookie:
-    removeCookie("KeyOfCookie");
+            removeCookie("KeyOfCookie");
 
 // get a list of cookies:
-    getCookies();
-    
+            getCookies();
+
 // set content-type of response:
-    setContentType(ContentType contentType);
-    
-    
+            setContentType(ContentType contentType);
+
+
 
 
 ```
@@ -167,7 +165,6 @@ Listeners of this event are being triggered,
 whenever the setHttpHandler method is called.
 
 Look up my project page of the [JEvent] on GitHub to see how to work with it.
-
 
 ***
 ### Annotations
@@ -200,6 +197,9 @@ This annotation must always come along with the following annotation.
 ```java
 package some.project.pkg;
 
+import com.github.sebyplays.jwebserver.AccessHandler;
+import com.github.sebyplays.jwebserver.api.Response;
+import com.github.sebyplays.jwebserver.api.Status;
 import com.github.sebyplays.jwebserver.utils.Priority;
 import com.github.sebyplays.jwebserver.utils.annotations.AccessController;
 import com.github.sebyplays.jwebserver.utils.annotations.Register;
@@ -209,9 +209,10 @@ import com.github.sebyplays.jwebserver.utils.annotations.Register;
 //Tell the method to register this class
 @Register(priority = Priority.DEFAULT)
 public class YourCustomHandler extends AccessHandler {
-    public void handle(HttpExchange httpExchange) throws IOException {
-        setHttpExchange(httpExchange);
-        respond(200, "IT WORKED!" + this.getQuery());
+
+    @Override
+    public Response handle(HttpExchange httpExchange, AccessHandler accessHandler) {
+        return new Response(Status.OK, "IT WORKED!" + this.getQuery());
     }
 }
 
@@ -231,3 +232,4 @@ MIT
 [lombok]: <https://projectlombok.org/>
 [org.json]: <https://github.com/stleary/JSON-java>
 [HttpServer]: <https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpServer.html>
+[JSoup]: <https://jsoup.org/>
