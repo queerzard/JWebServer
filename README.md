@@ -19,6 +19,9 @@ It simplifies the usage of the provided HttpServer.
 - [x] Custom 404 Page
 - [x] Improve Cookie-support
 - [x] Improve performance
+- [x] GET/POST annotation support
+- [x] Parameterize request-headers to methods 
+- [x] Inbuilt session support
 - [ ] Add SSL encryption support
 
 ## Used APIs
@@ -103,11 +106,12 @@ It includes the code, that is being executed, when calling the website.
 // Your IDE will prompt you to implement the "handle()" method. Do that.
 // Once you have implemented the method, your class should look like in the example.
 // Return a response object to send it.
-import com.github.sebyplays.jwebserver.AccessHandler;
+
+import com.github.sebyplays.jwebserver.api.AccessHandler;
 import com.github.sebyplays.jwebserver.api.Status;
 
 public class YourCustomHandler extends AccessHandler {
-    public Response handle(HttpExchange httpExchange, AccessHandler accessHandler){
+    public Response handle(HttpExchange httpExchange, AccessHandler accessHandler) {
         return new Response(Status.OK, "IT WORKED!" + this.getQuery());
     }
 }
@@ -176,11 +180,9 @@ Look up my project page of the [JEvent] on GitHub to see how to work with it.
 //so it's not neccessary anymore to execute the "registerContext(String s, AccessHandler a)" 
 //method in the JWebServer class for each class you want to register.
 
-//You must always define the priority of the handler. If the priority is set to high, 
-//the already registered module is overwritten and executed instead. 
-//If the priority is set to "DEFAULT" or "PRIORITIZED", the defined classes can be overwritten.
 
-This annotation must always come along with the following annotation.
+
+//This annotation must always come along with the following annotation.
 
 ```
 
@@ -190,6 +192,12 @@ This annotation must always come along with the following annotation.
 //The @AccessContoller class annotation defines the path 
 //under which the registered handler can be accessed.
 
+//The default path is the name of the class 
+//if there's not an index specified.
+
+//The priority of the handler was specified by the @Register annotation in the past,
+//but is now defined by the @AccessController annotation, 
+//as it's simpler and a lot more logical.
 ```
 
 ##### Annotated Example
@@ -197,22 +205,33 @@ This annotation must always come along with the following annotation.
 ```java
 package some.project.pkg;
 
-import com.github.sebyplays.jwebserver.AccessHandler;
+import com.github.sebyplays.jwebserver.api.AccessHandler;
 import com.github.sebyplays.jwebserver.api.Response;
 import com.github.sebyplays.jwebserver.api.Status;
-import com.github.sebyplays.jwebserver.utils.Priority;
-import com.github.sebyplays.jwebserver.utils.annotations.AccessController;
-import com.github.sebyplays.jwebserver.utils.annotations.Register;
+import com.github.sebyplays.jwebserver.api.annotations.ParamReqHeaders;
+import com.github.sebyplays.jwebserver.api.annotations.methods.POST;
+import com.github.sebyplays.jwebserver.utils.enums.Priority;
+import com.github.sebyplays.jwebserver.api.annotations.AccessController;
+import com.github.sebyplays.jwebserver.api.annotations.Register;
 
 //Define the controllers link
-@AccessController(index = "link/of/controller")
+@AccessController(index = "link/of/controller", priority = Priority.DEFAULT)
 //Tell the method to register this class
-@Register(priority = Priority.DEFAULT)
+@Register
 public class YourCustomHandler extends AccessHandler {
 
     @Override
     public Response handle(HttpExchange httpExchange, AccessHandler accessHandler) {
         return new Response(Status.OK, "IT WORKED!" + this.getQuery());
+    }
+
+    //Methods annotated with "@RequestMethod" are executed before the handler is invoked,
+    //providing you a simpler way to handle specific requests.
+    //The @RequestParam("key") annotation is used to define the headers that are required for the request.
+    //It will pass the desired values to the parameters of the method.
+    @RequestMethod("ALL")
+    public void handlePost(@RequestParam("email") String email, @RequestParam("password") String password) {
+        //Do something
     }
 }
 
